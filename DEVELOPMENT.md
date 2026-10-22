@@ -63,6 +63,14 @@ When you're done, you can destroy the cluster with:
 make clean.cluster.kind
 ```
 
+> **Note**: If both Docker and Podman are installed, the cleanup command
+> auto-detects the runtime. Set `CONTAINER_TOOL=podman` explicitly when
+> cleaning up a Podman-based cluster to avoid accidentally targeting Docker:
+>
+> ```bash
+> CONTAINER_TOOL=podman make clean.cluster.kind
+> ```
+
 # Testing
 
 ## Test Suites

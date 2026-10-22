@@ -76,6 +76,8 @@ def detect_container_runtime() -> str:
     # This lets callers force a runtime instead of relying on autodetection.
     override = os.environ.get("CONTAINER_TOOL", "").strip()
     if override:
+        if override not in ("docker", "podman"):
+            die(f"CONTAINER_TOOL must be 'docker' or 'podman', got '{override}'")
         _container_runtime = override
         return _container_runtime
 
@@ -85,7 +87,12 @@ def detect_container_runtime() -> str:
     # misdetecting a working Docker install as podman when both are present.
     result = run("docker info", check=False, capture_output=True)
     if result.returncode == 0:
-        _container_runtime = "docker"
+        # Detect podman-docker wrapper: when podman is aliased as docker,
+        # `docker info` succeeds but the output mentions "podman".
+        if "podman" in (result.stdout or "").lower():
+            _container_runtime = "podman"
+        else:
+            _container_runtime = "docker"
         return _container_runtime
 
     # Fall back to podman
